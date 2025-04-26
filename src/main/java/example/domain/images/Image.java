@@ -13,10 +13,6 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image extends BaseEntity {
 
-    @Comment("업로드 토큰")
-    @Column(name = "upload_token", nullable = false)
-    private String uploadToken;
-
     @Comment("이미지 경로")
     @Column(name = "path", nullable = false)
     private String path;
@@ -29,10 +25,13 @@ public class Image extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = true)
     private Product product;
 
-    public Image(String uploadToken, String path, String name, Product product) {
-        this.uploadToken = uploadToken;
+    public Image(String path, String imageName, Product product) {
         this.path = path;
-        this.name = name;
+        this.name = imageName;
         this.product = product;
+    }
+
+    public static Image create(String path, String imageName) {
+        return new Image(path, imageName, null);
     }
 }
