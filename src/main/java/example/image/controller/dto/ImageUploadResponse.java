@@ -40,9 +40,10 @@ public class ImageUploadResponse {
     public static ImageUploadResponse of(Long id,
                                          String path,
                                          String name,
+                                         Long productId,
                                          LocalDateTime createdAt,
                                          LocalDateTime updatedAt
     ) {
-        return new ImageUploadResponse(id, path, name, null, createdAt, updatedAt);
+        return new ImageUploadResponse(id, path, name, productId, createdAt, updatedAt);
     }
 }

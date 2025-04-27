@@ -24,6 +24,7 @@ public class ImageController {
                 image.getId(),
                 image.getPath(),
                 image.getName(),
+                null, // 초기 업로드 시 productId가 null로 저장되기때문에 null 고정 응답
                 image.getCreatedAt(),
                 image.getUpdatedAt()
         );

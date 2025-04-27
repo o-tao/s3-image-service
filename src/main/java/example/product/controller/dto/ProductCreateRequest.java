@@ -14,16 +14,16 @@ public class ProductCreateRequest {
     private String name;
     private int price;
     private String description;
-    private List<String> imageNames;
+    private List<Long> imageIds;
 
-    public ProductCreateRequest(String name, int price, String description, List<String> imageNames) {
+    public ProductCreateRequest(String name, int price, String description, List<Long> imageIds) {
         this.name = name;
         this.price = price;
         this.description = description;
-        this.imageNames = imageNames;
+        this.imageIds = imageIds;
     }
 
     public ProductCreateInfo toCreate() {
-        return new ProductCreateInfo(name, price, description, imageNames);
+        return new ProductCreateInfo(name, price, description, imageIds);
     }
 }
