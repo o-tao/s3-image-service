@@ -34,4 +34,8 @@ public class Image extends BaseEntity {
     public static Image create(String path, String imageName) {
         return new Image(path, imageName, null);
     }
+
+    public void assignProduct(Product product) {
+        this.product = product;
+    }
 }

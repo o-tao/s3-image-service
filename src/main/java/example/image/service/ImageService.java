@@ -61,7 +61,7 @@ public class ImageService {
         }
 
         // [Step 1-2] 확장자 존재 유무 검증
-        String imageName =  image.getOriginalFilename();
+        String imageName = image.getOriginalFilename();
         if (imageName == null || !imageName.contains(".")) {
             throw new CustomApplicationException(ErrorCode.NOT_EXIST_FILE_EXTENSION);
         }
@@ -109,13 +109,13 @@ public class ImageService {
      * DB에 업로드된 이미지 저장
      */
     private String createImage(String imageName) {
-        // [Step 3-1] DB 저장을 위한 entity 객체생성
-        Image createImage = Image.create(Path.PRODUCT_IMAGE_PATH.getValue(), imageName);
+        // [Step 3-1] 이미지 저장
+        Image image = imageRepository.save(Image.create(
+                Path.PRODUCT_IMAGE_PATH.getValue(),
+                imageName
+        ));
 
-        // [Step 3-2] 이미지 저장
-        Image image = imageRepository.save(createImage);
-
-        // [Step 3-3] imageName 반환
+        // [Step 3-2] imageName 반환
         return image.getName();
     }
 }
