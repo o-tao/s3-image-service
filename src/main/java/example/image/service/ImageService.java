@@ -39,14 +39,14 @@ public class ImageService {
      * - 외부에서 사용, DB에 저장된 imageName을 반환
      */
     @Transactional
-    public String upload(MultipartFile image) {
+    public Image upload(MultipartFile image) {
         // [Step 1] 유효성 검사
         validateImage(image);
 
         // [Step 2] 유효성 검증 완료 후 S3 업로드
         String imageName = uploadImageToS3(image);
 
-        // [Step 3] S3에 업로드 된 파일 DB 저장, imageName 반환
+        // [Step 3] S3에 업로드 된 파일 DB 저장, imageEntity 반환
         return createImage(imageName);
     }
 
@@ -108,14 +108,11 @@ public class ImageService {
      * [private 메서드]
      * DB에 업로드된 이미지 저장
      */
-    private String createImage(String imageName) {
-        // [Step 3-1] 이미지 저장
-        Image image = imageRepository.save(Image.create(
+    private Image createImage(String imageName) {
+        // [Step 3-1] 이미지 저장, imageEntity 반환
+        return imageRepository.save(Image.create(
                 Path.PRODUCT_IMAGE_PATH.getValue(),
                 imageName
         ));
-
-        // [Step 3-2] imageName 반환
-        return image.getName();
     }
 }
