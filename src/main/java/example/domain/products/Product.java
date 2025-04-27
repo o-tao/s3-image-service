@@ -28,4 +28,8 @@ public class Product extends BaseEntity {
         this.price = price;
         this.description = description;
     }
+
+    public static Product create(String name, int price, String description) {
+        return new Product(name, price, description);
+    }
 }
