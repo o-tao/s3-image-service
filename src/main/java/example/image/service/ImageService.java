@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
@@ -114,5 +116,31 @@ public class ImageService {
                 Path.PRODUCT_IMAGE_PATH.getValue(),
                 imageName
         ));
+    }
+
+    @Transactional
+    public void deleteImage(List<Image> images) {
+        List<String> keys = images.stream()
+                .map(image -> image.getPath() + image.getName())
+                .toList();
+
+        try {
+            DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(delete -> delete.objects(
+                            keys.stream()
+                                    .map(key -> ObjectIdentifier.builder().key(key).build())
+                                    .toList()
+                    ))
+                    .build();
+
+            s3Client.deleteObjects(deleteObjectsRequest);
+            imageRepository.deleteAll(images);
+            
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            throw new CustomApplicationException(ErrorCode.IO_EXCEPTION_DELETE_FILE);
+        }
+
     }
 }

@@ -1,10 +1,12 @@
 package example.domain.images.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import example.domain.images.Image;
 import example.domain.products.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static example.domain.images.QImage.image;
@@ -35,5 +37,18 @@ public class ImageQueryRepository {
                 .set(image.product.id, productId)
                 .where(image.id.in(imageIds))
                 .execute();
+    }
+
+    /**
+     * [고아 이미지 조회]
+     * - productId가 null 인 이미지 중 createdAt이 주어진 기준(threshold)보다 오래된 것들만 조회
+     */
+    public List<Image> findOldUnlinkedImages(LocalDateTime threshold) {
+        return jpaQueryFactory.selectFrom(image)
+                .where(
+                        image.product.isNull(),
+                        image.createdAt.before(threshold)
+                )
+                .fetch();
     }
 }
