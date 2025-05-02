@@ -1,14 +1,11 @@
 package example.product.controller;
 
-import example.image.controller.dto.ImageUploadResponse;
+import example.image.controller.dto.ImageResponse;
 import example.product.controller.dto.ProductCreateRequest;
 import example.product.controller.dto.ProductResponse;
 import example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/product")
@@ -18,7 +15,12 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ProductResponse<ImageUploadResponse> createProduct(@RequestBody ProductCreateRequest productCreateRequest) {
+    public ProductResponse<ImageResponse> createProduct(@RequestBody ProductCreateRequest productCreateRequest) {
         return productService.createProduct(productCreateRequest.toCreate());
+    }
+
+    @GetMapping("/{productId}")
+    public ProductResponse<ImageResponse> detailProduct(@PathVariable Long productId) {
+        return productService.detailProduct(productId);
     }
 }

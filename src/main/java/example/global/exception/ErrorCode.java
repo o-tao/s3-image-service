@@ -14,7 +14,8 @@ public enum ErrorCode {
     INVALID_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "허용되지 않는 파일 확장자입니다."),
     IO_EXCEPTION_DELETE_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 중 문제가 발생했습니다. 다시 시도해 주세요."),
     INVALID_URL_FORMAT(HttpStatus.BAD_REQUEST, "잘못된 URL 형식입니다."),
-    IMAGE_ID_MISSING(HttpStatus.BAD_REQUEST, "요청한 이미지가 존재하지 않습니다.");
+    IMAGE_ID_MISSING(HttpStatus.BAD_REQUEST, "요청한 이미지가 존재하지 않습니다."),
+    NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품이 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

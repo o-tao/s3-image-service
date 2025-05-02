@@ -6,7 +6,7 @@ import example.domain.products.Product;
 import example.domain.products.ProductRepository;
 import example.global.exception.CustomApplicationException;
 import example.global.exception.ErrorCode;
-import example.image.controller.dto.ImageUploadResponse;
+import example.image.controller.dto.ImageResponse;
 import example.product.controller.dto.ProductResponse;
 import example.product.service.dto.ProductCreateInfo;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class ProductService {
      * - 이미지의 경우 상품과 매핑된 이미지만 필터링하여 응답
      */
     @Transactional
-    public ProductResponse<ImageUploadResponse> createProduct(ProductCreateInfo productCreateInfo) {
+    public ProductResponse<ImageResponse> createProduct(ProductCreateInfo productCreateInfo) {
         // [Step 1] 상품 저장
         Product product = productRepository.save(Product.create(
                 productCreateInfo.getName(),
@@ -58,14 +58,44 @@ public class ProductService {
                 images.stream()
                         // 생성되는 상품에 매핑된 이미지만 필터링
                         .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
-                        .map(image -> ImageUploadResponse.of(
+                        .map(image -> ImageResponse.of(
                                 image.getId(),
+                                image.getProduct().getId(),
                                 image.getPath(),
                                 image.getName(),
-                                image.getProduct().getId(),
                                 image.getCreatedAt(),
                                 image.getUpdatedAt()
-                        )).toList()
+                        )).toList(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
+    }
+
+    /**
+     * [public 메서드]
+     * - 상품 상세조회 -> 상품 단일 정보, 이미지 list 응답
+     */
+    public ProductResponse<ImageResponse> detailProduct(Long productId) {
+        Product product = findProductById(productId);
+        List<Image> images = findImageByProductId(product.getId());
+
+        return ProductResponse.of(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getDescription(),
+                images.stream()
+                        .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
+                        .map(image -> ImageResponse.of(
+                                image.getId(),
+                                image.getProduct().getId(),
+                                image.getPath(),
+                                image.getName(),
+                                image.getCreatedAt(),
+                                image.getUpdatedAt()
+                        )).toList(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
         );
     }
 
@@ -78,5 +108,23 @@ public class ProductService {
         List<Image> images = imageRepository.findAllById(imageIds);
         if (images.isEmpty()) throw new CustomApplicationException(ErrorCode.IMAGE_ID_MISSING);
         return images;
+    }
+
+    /**
+     * [private 메서드]
+     * - productId 조회
+     */
+    private Product findProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new CustomApplicationException(ErrorCode.NOT_FOUND_PRODUCT));
+    }
+
+    /**
+     * [private 메서드]
+     * - productId로 이미지 List 조회
+     * - 이미지 없을 시 빈 리스트 응답
+     */
+    private List<Image> findImageByProductId(Long productId) {
+        return imageRepository.findByProductId(productId);
     }
 }

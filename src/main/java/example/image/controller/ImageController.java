@@ -1,7 +1,7 @@
 package example.image.controller;
 
 import example.domain.images.Image;
-import example.image.controller.dto.ImageUploadResponse;
+import example.image.controller.dto.ImageResponse;
 import example.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,13 +18,13 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/upload")
-    public ImageUploadResponse uploadImage(@RequestPart MultipartFile imageFile) {
+    public ImageResponse uploadImage(@RequestPart MultipartFile imageFile) {
         Image image = imageService.upload(imageFile);
-        return ImageUploadResponse.of(
+        return ImageResponse.of(
                 image.getId(),
+                null, // 초기 업로드 시 productId가 null로 저장되기때문에 null 고정 응답
                 image.getPath(),
                 image.getName(),
-                null, // 초기 업로드 시 productId가 null로 저장되기때문에 null 고정 응답
                 image.getCreatedAt(),
                 image.getUpdatedAt()
         );
