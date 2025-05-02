@@ -1,8 +1,8 @@
 package example.image.service;
 
 import example.domain.images.Image;
-import example.domain.images.ImageRepository;
 import example.domain.images.Path;
+import example.domain.images.repository.ImageRepository;
 import example.global.exception.CustomApplicationException;
 import example.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,8 @@
 package example.product.service;
 
 import example.domain.images.Image;
-import example.domain.images.ImageRepository;
+import example.domain.images.repository.ImageQueryRepository;
+import example.domain.images.repository.ImageRepository;
 import example.domain.products.Product;
 import example.domain.products.ProductRepository;
 import example.global.exception.CustomApplicationException;
@@ -9,6 +10,7 @@ import example.global.exception.ErrorCode;
 import example.image.controller.dto.ImageResponse;
 import example.product.controller.dto.ProductResponse;
 import example.product.service.dto.ProductCreateInfo;
+import example.product.service.dto.ProductUpdateInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ImageRepository imageRepository;
+    private final ImageQueryRepository imageQueryRepository;
 
     /**
      * [public 메서드]
@@ -77,6 +80,54 @@ public class ProductService {
      */
     public ProductResponse<ImageResponse> detailProduct(Long productId) {
         Product product = findProductById(productId);
+        List<Image> images = findImageByProductId(product.getId());
+
+        return ProductResponse.of(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getDescription(),
+                images.stream()
+                        .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
+                        .map(image -> ImageResponse.of(
+                                image.getId(),
+                                image.getProduct().getId(),
+                                image.getPath(),
+                                image.getName(),
+                                image.getCreatedAt(),
+                                image.getUpdatedAt()
+                        )).toList(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
+    }
+
+    /**
+     * [public 메서드]
+     * - 상품 수정
+     * - 이미지 매핑 null 벌크 업데이트 후 요청 데이터에 imageIds 존재 시 재 매핑 (벌크업데이트)
+     */
+    @Transactional
+    public ProductResponse<ImageResponse> updateProduct(ProductUpdateInfo productUpdateInfo) {
+        // [Step 1] 업데이트 할 product 조회
+        Product product = findProductById(productUpdateInfo.getId());
+
+        // [Step 2] 상품 정보 업데이트
+        product.update(
+                productUpdateInfo.getName(),
+                productUpdateInfo.getPrice(),
+                productUpdateInfo.getDescription()
+        );
+
+        // [Step 3] 기존 이미지 매핑 해제 (기존의 product와 연결된 이미지들의 product를 null로 설정)
+        imageQueryRepository.clearProductFromImages(productUpdateInfo.getId());
+
+        // [Step 4] 이미지 ID가 존재하면, 해당 이미지 ID로 새로운 이미지 매핑 (벌크 업데이트)
+        if (!productUpdateInfo.getImageIds().isEmpty()) {
+            imageQueryRepository.assignProduct(productUpdateInfo.getId(), productUpdateInfo.getImageIds());
+        }
+
+        // [Step 5] 응답 생성 (상품에 매핑된 이미지 목록을 포함)
         List<Image> images = findImageByProductId(product.getId());
 
         return ProductResponse.of(

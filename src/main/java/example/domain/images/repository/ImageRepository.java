@@ -1,5 +1,6 @@
-package example.domain.images;
+package example.domain.images.repository;
 
+import example.domain.images.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
