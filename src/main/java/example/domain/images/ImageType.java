@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Path {
-    PRODUCT_IMAGE_PATH("product/");
+public enum ImageType {
+    PRODUCT("product/");
 
-    private final String value;
+    private final String path;
 }

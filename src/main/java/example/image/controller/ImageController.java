@@ -1,6 +1,7 @@
 package example.image.controller;
 
 import example.domain.images.Image;
+import example.domain.images.ImageType;
 import example.image.controller.dto.ImageResponse;
 import example.image.service.ImageScheduler;
 import example.image.service.ImageService;
@@ -17,8 +18,10 @@ public class ImageController {
     private final ImageScheduler imageScheduler;
 
     @PostMapping("/upload")
-    public ImageResponse uploadImage(@RequestPart MultipartFile imageFile) {
-        Image image = imageService.upload(imageFile);
+    public ImageResponse uploadImage(@RequestPart MultipartFile imageFile,
+                                     @RequestParam("type") ImageType imageType
+    ) {
+        Image image = imageService.upload(imageFile, imageType);
         return ImageResponse.of(
                 image.getId(),
                 null, // 초기 업로드 시 productId가 null로 저장되기때문에 null 고정 응답

@@ -1,7 +1,7 @@
 package example.image.service;
 
 import example.domain.images.Image;
-import example.domain.images.Path;
+import example.domain.images.ImageType;
 import example.domain.images.repository.ImageRepository;
 import example.global.exception.CustomApplicationException;
 import example.global.exception.ErrorCode;
@@ -41,12 +41,12 @@ public class ImageService {
      * - 외부에서 사용, DB에 저장된 imageName을 반환
      */
     @Transactional
-    public Image upload(MultipartFile image) {
+    public Image upload(MultipartFile image, ImageType imageType) {
         // [Step 1] 유효성 검사
         validateImage(image);
 
         // [Step 2] 유효성 검증 완료 후 S3 업로드
-        String imageName = uploadImageToS3(image);
+        String imageName = uploadImageToS3(image, imageType);
 
         // [Step 3] S3에 업로드 된 파일 DB 저장, imageEntity 반환
         return createImage(imageName);
@@ -80,7 +80,7 @@ public class ImageService {
      * [private 메서드]
      * - S3 업로드
      */
-    private String uploadImageToS3(MultipartFile image) {
+    private String uploadImageToS3(MultipartFile image, ImageType imageType) {
         String extension = Objects.requireNonNull(image.getOriginalFilename())
                 .substring(image.getOriginalFilename().lastIndexOf(".") + 1); // 확장자 명
         String imageName = UUID.randomUUID() + "." + extension;
@@ -89,7 +89,7 @@ public class ImageService {
             // PutObjectRequest 객체 생성
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName) // 버킷 이름
-                    .key(Path.PRODUCT_IMAGE_PATH.getValue() + imageName) // 저장할 파일 이름
+                    .key(imageType.getPath() + imageName) // 저장할 파일 이름
                     .acl(ObjectCannedACL.PUBLIC_READ) // 퍼블릭 읽기 권한
                     .contentType(image.getContentType()) // 이미지 MIME 타입
                     .build();
@@ -113,7 +113,7 @@ public class ImageService {
     private Image createImage(String imageName) {
         // [Step 3-1] 이미지 저장, imageEntity 반환
         return imageRepository.save(Image.create(
-                Path.PRODUCT_IMAGE_PATH.getValue(),
+                ImageType.PRODUCT.getPath(),
                 imageName
         ));
     }
