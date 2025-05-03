@@ -1,6 +1,7 @@
 package example.image.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import example.domain.images.Image;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,13 +38,14 @@ public class ImageResponse {
         this.updatedAt = updatedAt;
     }
 
-    public static ImageResponse of(Long id,
-                                   Long productId,
-                                   String path,
-                                   String name,
-                                   LocalDateTime createdAt,
-                                   LocalDateTime updatedAt
-    ) {
-        return new ImageResponse(id, productId, path, name, createdAt, updatedAt);
+    public static ImageResponse of(Image image) {
+        return new ImageResponse(
+                image.getId(),
+                image.getProduct() != null ? image.getProduct().getId() : null,
+                image.getPath(),
+                image.getName(),
+                image.getCreatedAt(),
+                image.getUpdatedAt()
+        );
     }
 }

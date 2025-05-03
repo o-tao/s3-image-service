@@ -22,14 +22,7 @@ public class ImageController {
                                      @RequestParam("type") ImageType imageType
     ) {
         Image image = imageService.upload(imageFile, imageType);
-        return ImageResponse.of(
-                image.getId(),
-                null, // 초기 업로드 시 productId가 null로 저장되기때문에 null 고정 응답
-                image.getPath(),
-                image.getName(),
-                image.getCreatedAt(),
-                image.getUpdatedAt()
-        );
+        return ImageResponse.of(image);
     }
 
     @DeleteMapping("/delete")

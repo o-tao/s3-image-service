@@ -54,23 +54,8 @@ public class ProductService {
 
         // [Step 3] 응답 생성 (이미지는 생성되는 상품에 연결된 이미지만 포함)
         return ProductResponse.of(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDescription(),
-                images.stream()
-                        // 생성되는 상품에 매핑된 이미지만 필터링
-                        .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
-                        .map(image -> ImageResponse.of(
-                                image.getId(),
-                                image.getProduct().getId(),
-                                image.getPath(),
-                                image.getName(),
-                                image.getCreatedAt(),
-                                image.getUpdatedAt()
-                        )).toList(),
-                product.getCreatedAt(),
-                product.getUpdatedAt()
+                product,
+                images.stream().map(ImageResponse::of).toList()
         );
     }
 
@@ -83,22 +68,8 @@ public class ProductService {
         List<Image> images = findImageByProductId(product.getId());
 
         return ProductResponse.of(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDescription(),
-                images.stream()
-                        .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
-                        .map(image -> ImageResponse.of(
-                                image.getId(),
-                                image.getProduct().getId(),
-                                image.getPath(),
-                                image.getName(),
-                                image.getCreatedAt(),
-                                image.getUpdatedAt()
-                        )).toList(),
-                product.getCreatedAt(),
-                product.getUpdatedAt()
+                product,
+                images.stream().map(ImageResponse::of).toList()
         );
     }
 
@@ -131,22 +102,8 @@ public class ProductService {
         List<Image> images = findImageByProductId(product.getId());
 
         return ProductResponse.of(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDescription(),
-                images.stream()
-                        .filter(image -> image.getProduct() != null && image.getProduct().getId().equals(product.getId()))
-                        .map(image -> ImageResponse.of(
-                                image.getId(),
-                                image.getProduct().getId(),
-                                image.getPath(),
-                                image.getName(),
-                                image.getCreatedAt(),
-                                image.getUpdatedAt()
-                        )).toList(),
-                product.getCreatedAt(),
-                product.getUpdatedAt()
+                product,
+                images.stream().map(ImageResponse::of).toList()
         );
     }
 

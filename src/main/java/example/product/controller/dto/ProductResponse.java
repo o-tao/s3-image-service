@@ -1,6 +1,7 @@
 package example.product.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import example.domain.products.Product;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,14 +42,15 @@ public class ProductResponse<T> {
         this.updatedAt = updatedAt;
     }
 
-    public static <T> ProductResponse<T> of(Long id,
-                                            String name,
-                                            int price,
-                                            String description,
-                                            List<T> images,
-                                            LocalDateTime createdAt,
-                                            LocalDateTime updatedAt
-    ) {
-        return new ProductResponse<>(id, name, price, description, images, createdAt, updatedAt);
+    public static <T> ProductResponse<T> of(Product product, List<T> images) {
+        return new ProductResponse<>(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getDescription(),
+                images,
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
     }
 }
