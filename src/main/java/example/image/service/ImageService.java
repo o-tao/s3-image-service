@@ -118,13 +118,17 @@ public class ImageService {
         ));
     }
 
+    /**
+     * [public 메서드]
+     * S3, DB 이미지 제거
+     */
     @Transactional
     public void deleteImage(List<Image> images) {
-        List<String> keys = images.stream()
-                .map(image -> image.getPath() + image.getName())
-                .toList();
+        // [Step 1] 각 이미지 객체의 path와 name을 결합해 S3에서 삭제할 키 목록 생성
+        List<String> keys = getFullKeys(images);
 
         try {
+            // [Step 2] 생성한 키 목록을 기반으로 S3에서 파일을 삭제하기 위한 요청 객체 생성
             DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
                     .bucket(bucketName)
                     .delete(delete -> delete.objects(
@@ -134,13 +138,23 @@ public class ImageService {
                     ))
                     .build();
 
+            // [Step 3] S3 및 DB 이미지 제거
             s3Client.deleteObjects(deleteObjectsRequest);
             imageRepository.deleteAll(images);
-            
+
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
             throw new CustomApplicationException(ErrorCode.IO_EXCEPTION_DELETE_FILE);
         }
+    }
 
+    /**
+     * [private 메서드]
+     * 이미지 객체의 path와 name을 결합하여 S3에서 삭제할 키 목록 생성
+     */
+    private List<String> getFullKeys(List<Image> images) {
+        return images.stream()
+                .map(image -> image.getPath() + image.getName())
+                .toList();
     }
 }

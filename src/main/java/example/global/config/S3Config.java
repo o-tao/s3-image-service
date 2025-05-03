@@ -1,4 +1,4 @@
-package example.global.awsS3;
+package example.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
