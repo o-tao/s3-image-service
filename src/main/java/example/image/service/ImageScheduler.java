@@ -1,7 +1,6 @@
 package example.image.service;
 
 import example.domain.images.Image;
-import example.domain.images.repository.ImageQueryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,14 +16,13 @@ import java.util.List;
 public class ImageScheduler {
 
     private final ImageService imageService;
-    private final ImageQueryRepository imageQueryRepository;
 
     @Transactional
     @Scheduled(cron = "0 0 0 * * MON") // 매주 월요일 00시 동작
     public void deleteOrphanImages() {
         LocalDateTime threshold = LocalDateTime.now().minusWeeks(1); // 일주일 이상 지난 이미지
 
-        List<Image> oldUnlinkedImages = imageQueryRepository.findOldUnlinkedImages(threshold);
+        List<Image> oldUnlinkedImages = imageService.findOldUnlinkedImages(threshold);
 
         if (!oldUnlinkedImages.isEmpty()) {
             imageService.deleteImage(oldUnlinkedImages);

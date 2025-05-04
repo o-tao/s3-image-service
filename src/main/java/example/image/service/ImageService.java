@@ -2,6 +2,7 @@ package example.image.service;
 
 import example.domain.images.Image;
 import example.domain.images.ImageType;
+import example.domain.images.repository.ImageQueryRepository;
 import example.domain.images.repository.ImageRepository;
 import example.global.exception.CustomApplicationException;
 import example.global.exception.ErrorCode;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +34,7 @@ public class ImageService {
 
     private final S3Client s3Client;
     private final ImageRepository imageRepository;
+    private final ImageQueryRepository imageQueryRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -49,7 +52,7 @@ public class ImageService {
         String imageName = uploadImageToS3(image, imageType);
 
         // [Step 3] S3에 업로드 된 파일 DB 저장, imageEntity 반환
-        return createImage(imageName);
+        return createImage(imageType, imageName);
     }
 
     /**
@@ -110,10 +113,10 @@ public class ImageService {
      * [private 메서드]
      * DB에 업로드된 이미지 저장
      */
-    private Image createImage(String imageName) {
+    private Image createImage(ImageType imageType, String imageName) {
         // [Step 3-1] 이미지 저장, imageEntity 반환
         return imageRepository.save(Image.create(
-                ImageType.PRODUCT.getPath(),
+                imageType.getPath(),
                 imageName
         ));
     }
@@ -156,5 +159,50 @@ public class ImageService {
         return images.stream()
                 .map(image -> image.getPath() + image.getName())
                 .toList();
+    }
+
+    /**
+     * [public 메서드]
+     * - 이미지 ID를 기준으로 이미지 목록을 조회
+     * - 조회된 이미지가 없다면 예외 발생, List응답은 빈값으로 처리되어 Optional처리가 되지 않아 Empty로 직접 체크
+     */
+    public List<Image> findAllByImageId(List<Long> imageIds) {
+        List<Image> images = imageRepository.findAllById(imageIds);
+        if (images.isEmpty()) throw new CustomApplicationException(ErrorCode.IMAGE_ID_MISSING);
+        return images;
+    }
+
+    /**
+     * [public 메서드]
+     * - productId로 이미지 List 조회
+     * - 이미지 없을 시 빈 리스트 응답
+     */
+    public List<Image> findImageByProductId(Long productId) {
+        return imageRepository.findByProductId(productId);
+    }
+
+    /**
+     * [public 메서드]
+     * - image <-> productId 매핑해제
+     */
+    public void clearProductFromImages(Long productId) {
+        imageQueryRepository.clearProductFromImages(productId);
+    }
+
+    /**
+     * [public 메서드]
+     * - image <-> productId 매핑
+     */
+    public void assignProduct(Long productId, List<Long> imageIds) {
+        imageQueryRepository.assignProduct(productId, imageIds);
+    }
+
+    /**
+     * [public 메서드]
+     * - 고아 이미지 조회
+     * - productId가 null 인 이미지 중 createdAt이 주어진 기준(threshold)보다 오래된 것들만 조회
+     */
+    public List<Image> findOldUnlinkedImages(LocalDateTime threshold) {
+        return imageQueryRepository.findOldUnlinkedImages(threshold);
     }
 }

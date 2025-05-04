@@ -1,13 +1,12 @@
 package example.product.service;
 
 import example.domain.images.Image;
-import example.domain.images.repository.ImageQueryRepository;
-import example.domain.images.repository.ImageRepository;
 import example.domain.products.Product;
 import example.domain.products.ProductRepository;
 import example.global.exception.CustomApplicationException;
 import example.global.exception.ErrorCode;
 import example.image.controller.dto.ImageResponse;
+import example.image.service.ImageService;
 import example.product.controller.dto.ProductResponse;
 import example.product.service.dto.ProductCreateInfo;
 import example.product.service.dto.ProductUpdateInfo;
@@ -24,8 +23,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ImageRepository imageRepository;
-    private final ImageQueryRepository imageQueryRepository;
+    private final ImageService imageService;
 
     /**
      * [public 메서드]
@@ -46,7 +44,7 @@ public class ProductService {
 
         // [Step 2] 이미지 매핑 (이미지가 존재할 경우에만 처리)
         if (productCreateInfo.getImageIds() != null && !productCreateInfo.getImageIds().isEmpty()) { // 이미지 목록이 비어있지 않으면 처리
-            images = findAllByImageId(productCreateInfo.getImageIds()); // 이미지 목록 조회
+            images = imageService.findAllByImageId(productCreateInfo.getImageIds()); // 이미지 목록 조회
             images.stream()
                     .filter(image -> image.getProduct() == null) // 상품과 연결되지 않은 이미지만 필터링
                     .forEach(image -> image.assignProduct(product)); // 해당 이미지를 상품에 할당
@@ -65,7 +63,7 @@ public class ProductService {
      */
     public ProductResponse<ImageResponse> detailProduct(Long productId) {
         Product product = findProductById(productId);
-        List<Image> images = findImageByProductId(product.getId());
+        List<Image> images = imageService.findImageByProductId(product.getId());
 
         return ProductResponse.of(
                 product,
@@ -91,15 +89,15 @@ public class ProductService {
         );
 
         // [Step 3] 기존 이미지 매핑 해제 (기존의 product와 연결된 이미지들의 product를 null로 설정)
-        imageQueryRepository.clearProductFromImages(productUpdateInfo.getId());
+        imageService.clearProductFromImages(productUpdateInfo.getId());
 
         // [Step 4] 이미지 ID가 존재하면, 해당 이미지 ID로 새로운 이미지 매핑 (벌크 업데이트)
         if (!productUpdateInfo.getImageIds().isEmpty()) {
-            imageQueryRepository.assignProduct(productUpdateInfo.getId(), productUpdateInfo.getImageIds());
+            imageService.assignProduct(productUpdateInfo.getId(), productUpdateInfo.getImageIds());
         }
 
         // [Step 5] 응답 생성 (상품에 매핑된 이미지 목록을 포함)
-        List<Image> images = findImageByProductId(product.getId());
+        List<Image> images = imageService.findImageByProductId(product.getId());
 
         return ProductResponse.of(
                 product,
@@ -109,30 +107,10 @@ public class ProductService {
 
     /**
      * [private 메서드]
-     * - 이미지 ID를 기준으로 이미지 목록을 조회
-     * - 조회된 이미지가 없다면 예외 발생, List응답은 빈값으로 처리되어 Optional처리가 되지 않아 Empty로 직접 체크
-     */
-    private List<Image> findAllByImageId(List<Long> imageIds) {
-        List<Image> images = imageRepository.findAllById(imageIds);
-        if (images.isEmpty()) throw new CustomApplicationException(ErrorCode.IMAGE_ID_MISSING);
-        return images;
-    }
-
-    /**
-     * [private 메서드]
      * - productId 조회
      */
     private Product findProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new CustomApplicationException(ErrorCode.NOT_FOUND_PRODUCT));
-    }
-
-    /**
-     * [private 메서드]
-     * - productId로 이미지 List 조회
-     * - 이미지 없을 시 빈 리스트 응답
-     */
-    private List<Image> findImageByProductId(Long productId) {
-        return imageRepository.findByProductId(productId);
     }
 }
