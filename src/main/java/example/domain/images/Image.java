@@ -31,10 +31,12 @@ public class Image extends BaseEntity {
         this.product = product;
     }
 
+    // 상품과 연결되지 않은 임시 이미지 생성 (product = null)
     public static Image create(String path, String imageName) {
         return new Image(path, imageName, null);
     }
 
+    // 이미지 <-> 상품 매핑
     public void assignProduct(Product product) {
         this.product = product;
     }

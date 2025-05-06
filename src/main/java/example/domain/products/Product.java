@@ -31,10 +31,12 @@ public class Product extends BaseEntity {
         this.description = description;
     }
 
+    // 상품 생성
     public static Product create(String name, int price, String description) {
         return new Product(name, price, description);
     }
 
+    // 상품 업데이트
     public void update(String name, int price, String description) {
         this.name = name;
         this.price = price;
