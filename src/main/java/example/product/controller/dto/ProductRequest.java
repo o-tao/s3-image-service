@@ -24,10 +24,12 @@ public class ProductRequest {
         this.imageIds = imageIds;
     }
 
+    // 상품 생성 정보 DTO로 데이터 전달
     public ProductCreateInfo toCreate() {
         return new ProductCreateInfo(name, price, description, imageIds);
     }
 
+    // 상품 수정 정보 DTO로 데이터 전달
     public ProductUpdateInfo toUpdate(Long productId) {
         return new ProductUpdateInfo(productId, name, price, description, imageIds);
     }
